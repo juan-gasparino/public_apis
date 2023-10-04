@@ -1,0 +1,56 @@
+FROM python:3.10-slim-bullseye as base
+
+# The base image cannot be apline linux since it brings more issues than solutions
+# https://pythonspeed.com/articles/base-image-python-docker-images/
+
+# PYTHONFAULTHANDLER used to show more details when the progran crashes (more details here https://docs.python.org/3/library/faulthandler.html)
+# PYTHONHASHSEED used to protect the program for a certain type of attack (https://docs.python.org/3/using/cmdline.html#cmdoption-R)
+# PYTHONUNBUFFERED used to directly output everything without buffering it (https://stackoverflow.com/a/59812588)
+
+ENV PYTHONFAULTHANDLER=1 \
+  PYTHONHASHSEED=random \
+  PYTHONUNBUFFERED=1
+
+FROM base as builder
+
+WORKDIR /app
+
+# PIP_NO_CACHE_DIR disable pip cache since we won't be installing another lib later on the same container
+# PIP_DISABLE_PIP_VERSION_CHECK we know, we know that a new version of pip is availble, but we don't really care about it
+# PIP_DEFAULT_TIMEOUT timeout after which the fetching of a lib is aborted the installation is canceled
+# POETRY_VERSION whih version of poetry to use, should preferably always be the latest vesion
+
+ENV PIP_NO_CACHE_DIR=1 \
+  PIP_DISABLE_PIP_VERSION_CHECK=on \
+  PIP_DEFAULT_TIMEOUT=100
+
+COPY pyproject.toml poetry.lock ./
+
+# Using poetry to build the image as described here : https://stackoverflow.com/a/57886655
+# Install the necessary libs to be able to build some dependencies
+RUN pip install poetry && \
+  python -m venv /venv && \
+  poetry export -f requirements.txt | /venv/bin/pip install -r /dev/stdin && /venv/bin/pip install debugpy
+
+
+
+FROM base as final
+
+ARG DEBUG_PORT
+ENV DEBUG_PORT "6789"
+
+# Make python use the venv that we just copied
+ENV PATH="/venv/bin:${PATH}" \
+  VIRTUAL_ENV="/venv"
+
+WORKDIR /app
+
+# Get the dependencies from the builder container
+COPY --from=builder /venv /venv
+
+# Use a non-root use for security reasons
+RUN adduser --system --group --no-create-home johndoe
+USER johndoe
+
+# Actual entrypoint of the program, we can't use brackets here otherwise DOCKER_HOST isn't expanded
+ENTRYPOINT python3 -m debugpy --listen "0.0.0.0:6789" api/main.py

@@ -1,0 +1,80 @@
+CREATE TABLE IF NOT EXISTS wallet (
+  id           SERIAL PRIMARY KEY,
+  name         VARCHAR(255),
+  icon_link    VARCHAR(255),
+  amount       INTEGER,
+  price_bought FLOAT,
+  date_bought  BIGINT
+);
+
+CREATE TABLE IF NOT EXISTS crypto_info (
+  id           SERIAL PRIMARY KEY,
+  wallet_id    INT NOT NULL,
+  name         VARCHAR(255),
+  icon_link    VARCHAR(255),
+  description  VARCHAR(255),
+  link         VARCHAR(255),
+  exchanges    VARCHAR(255),
+  CONSTRAINT fk_wallet FOREIGN KEY(wallet_id) REFERENCES wallet(id)
+);
+
+/*ADD DUMMY CONTENT TO TABLES*/
+
+INSERT INTO wallet (name, icon_link, amount, price_bought, date_bought)
+VALUES ('BTC',
+        'https://s2.coinmarketcap.com/static/img/coins/128x128/1.png',
+        0,
+        0.0,
+        1696194539753),
+        ('ETH',
+        'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png',
+        0,
+        0.0,
+        1696194539753),
+        ('LTC',
+        'https://s2.coinmarketcap.com/static/img/coins/128x128/2.png',
+        0,
+        0.0,
+        1696194539753),
+        ('USDT',
+        'https://s2.coinmarketcap.com/static/img/coins/128x128/825.png',
+        0,
+        0.0,
+        1696194539753),
+        ('BNB',
+        'https://s2.coinmarketcap.com/static/img/coins/128x128/1839.png',
+        0,
+        0.0,
+        1696194539753);
+
+INSERT INTO crypto_info (wallet_id, name, icon_link, description, link, exchanges)
+VALUES  (1,
+        'Bitcoin',
+        'https://s2.coinmarketcap.com/static/img/coins/128x128/1.png',
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
+        'https://bitcoin.org/en',
+        '[{"name":"binance","link":"www.binance.com/en"},{"name":"kucoin","link":"www.kucoin.com"}]'),
+        (2,
+        'Etherium',
+        'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png',
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
+        'https://ethereum.org/en',
+        '[{"name":"binance","link":"www.binance.com/en"},{"name":"kucoin","link":"www.kucoin.com"}]'),
+        (3,
+        'Litecoin',
+        'https://s2.coinmarketcap.com/static/img/coins/128x128/2.png',
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
+        'https://litecoin.com/en',
+        '[{"name":"binance","link":"www.binance.com/en"},{"name":"kucoin","link":"www.kucoin.com"}]'),
+        (4,
+        'Thether',
+        'https://s2.coinmarketcap.com/static/img/coins/128x128/825.png',
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
+        'https://tether.to/en',
+        '[{"name":"binance","link":"www.binance.com/en"},{"name":"kucoin","link":"www.kucoin.com"}]'),
+        (5,
+        'Binance_coin',
+        'https://s2.coinmarketcap.com/static/img/coins/128x128/1839.png',
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
+        'https://www.binance.com/en/bnb',
+        '[{"name":"binance","link":"www.binance.com/en"},{"name":"kucoin","link":"www.kucoin.com"}]');
